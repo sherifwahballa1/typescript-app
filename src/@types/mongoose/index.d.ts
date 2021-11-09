@@ -4,6 +4,9 @@ declare module 'mongoose' {
       name: any;
     };
     cache(): DocumentQuery<T[], Document> & QueryHelpers;
+    userByName(name: string): DocumentQuery<T[], Document> & QueryHelpers;
+    byName(name: string): DocumentQuery<T[], Document> & QueryHelpers;
+    byEmail(email: string): DocumentQuery<T[], Document> & QueryHelpers;
     useCache: boolean;
     hashKey: string;
 		expire: number;

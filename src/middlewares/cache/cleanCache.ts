@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { clearHash } from "../../services/cache";
+import { clearHash } from "../../services/cache/cache";
 
 export const cleanCache = async (
 	req: Request,

@@ -1,23 +1,45 @@
-import { NextFunction, Request, Response } from "express";
-import { User } from "../../models/user";
+import { Request, Response } from "express";
+import keys from "../../config";
+import { User } from "../../models/Users/user";
+import { buildTempCookies } from "../../services/cookie";
+import { Token } from "../../services/jwt"
 
 export const SignUp = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
-  try {
-    const { email, password } = req.body;
+  const { name, email, password, country } = req.body;
 
-    let existingUser = await User.findOne({ email }).cache({ key: 'ADF', expire: 400 })
+  let existingUser = await User.findOne({
+    $or: [
+      { email },
+      { name }
+    ]
+  });
 
-    if (existingUser) return res.status(400).send({ message: 'Email in use' });
 
-    const user = User.build({ email, password });
-    await user.save();
+  if (existingUser && existingUser.name === name)
+    return res.status(200).json({ valid: false, msg: "Name has already been taken.", taken: true })
 
-    return res.status(200).send(user);
-  } catch (error) {
-    next(error)
+  if (existingUser)
+    return res
+      .status(200)
+      .json({ valid: false, msg: "Email has already been taken.", taken: true })
+
+
+  const user = User.build({ name, email, password, country });
+  await user.save();
+
+  // generate temp token valid for 1 hour.
+  let token = Token.generateTempJWT({ email: email, userID: user.userID });
+
+  if (req.session) {
+    req.session.user = { user: user.userID, token };
+    req.session.cookie.maxAge = keys.cookie_temp_maxAge_in_Min * 60 * 1000; // 1 hour
+    req.session.save();
   }
+
+  buildTempCookies(req, res, token);
+
+  return res.status(200).send({ user, token });
 };

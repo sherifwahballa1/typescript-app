@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import RedisManager from "../core/connections/redis/RedisManager";
-import Log from "../utils/Log";
+import RedisManager from "../../core/connections/redis/RedisManager";
+import Log from "../../utils/Log";
 type CacheOptions = { key?: string, expire: number };
 const client = RedisManager.client;
 

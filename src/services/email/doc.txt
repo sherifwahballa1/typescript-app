@@ -1,0 +1,7 @@
+https://dev.to/chandrapantachhetri/sending-emails-securely-using-node-js-nodemailer-smtp-gmail-and-oauth2-g3a
+
+
+
+
+
+https://www.freecodecamp.org/news/use-nodemailer-to-send-emails-from-your-node-js-server/

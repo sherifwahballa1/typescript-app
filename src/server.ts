@@ -2,15 +2,18 @@ import http from 'http';
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + '/env/.env' });
 import 'colors';
-import https from 'https';
+// import https from 'https';
 import fs from 'fs';
+import app from './app'
 
 import Log from './utils/Log';
 import Logger from './utils/Logger';
-import "./services/cache";
+import "./services/cache/cache";
 import keys from './config';
 
-import app from './app'
+const debug = require("debug")("demo07:server");
+
+
 import { mongoConnection, closeMongoConnection } from './utils/mongo-connection';
 import { socketConnection } from './utils/socket-connection';
 
@@ -46,21 +49,17 @@ const start = async () => {
 
 let server: any;
 // ======== https ==========
-if (process.env.NODE_ENV === 'production') {
-  server = https.createServer(options, app).listen(PORT, async () => {
-    Log.info(`Current Environment:  ----- ${process.env.NODE_ENV} ----- :  https`)
-
-
-
-
-    await start();
-  });
-} else {
-  server = http.createServer(app).listen(PORT, async () => {
-    Log.info(`Current Environment:  ----- ${process.env.NODE_ENV} ----- :  http`)
-    await start();
-  });
-}
+// if (process.env.NODE_ENV === 'production') {
+//   server = https.createServer(options, app).listen(PORT, async () => {
+//     Log.info(`Current Environment:  ----- ${process.env.NODE_ENV} ----- :  https`)
+//     await start();
+//   });
+// } else {
+server = http.createServer(app).listen(PORT, async () => {
+  Log.info(`Current Environment:  ----- ${process.env.NODE_ENV} -----`)
+  await start();
+});
+// }
 
 server.on("error", onError);
 server.on("listening", onListening);
@@ -106,6 +105,10 @@ function normalizePort(val: string) {
     return port;
   }
 
+  Logger.error(
+    `⚠️ ⚠️ ⚠️  Bruh... port = ${port}? 📌📌📌 , some function will be missing!!!`
+  );
+
   return false;
 }
 
@@ -124,13 +127,13 @@ function onError(error: any) {
   switch (error.code) {
     case "EACCES":
       Log.error(`${bind} requires elevated privileges ❌`)
-      Logger.error(error);
-      // process.exit(1);
+      // Logger.error(error);
+      process.exit(1);
       break;
     case "EADDRINUSE":
       Log.error(`${bind} is already in use ❌`)
-      Logger.error(error);
-      // process.exit(1);
+      // Logger.error(error);
+      process.exit(1);
       break;
     default:
       Logger.error(error);
@@ -146,6 +149,7 @@ function onListening() {
   let addr = server.address();
   let bind = typeof addr === "string" ? "pipe " + addr : "port " + addr?.port;
   Log.info(`################## running on ${bind}`)
+  debug(`Listening on ${bind}`);
 }
 
 export default server;
