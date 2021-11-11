@@ -1,23 +1,20 @@
-// import { Request, Response } from 'express';
-// import { buildTempCookies } from '../../../services/cookie';
-// import { Token } from '../../../services/jwt';
+import { Request, Response } from 'express';
+import { Schema } from "mongoose";
 
-// export const validTempSession = (req: Request, res: Response): boolean => {
-//   if (req.session && req.session.user) {
-//     if (Date.parse(`${req.session.cookie.expires}`) < Date.now()) return false;
-//     req.session.touch();
-//     buildTempCookies(req, res, req.session.user?.token as string);
-//     return true;
-//   }
+import { buildCookies } from '../../../services/cookie';
+import { Token } from '../../../services/jwt';
 
-//   if (req.signedCookies && req.signedCookies.t_token) {
-//     let info = Token.verifyTempJWT(req.signedCookies.t_token);
-//     if (info) {
-//       req.session.user = { user: info?.userID, token: req.signedCookies.t_token };
-//       req.session.save();
-//       return true;
-//     }
-//   }
+export const validSession = async (req: Request, res: Response): Promise<boolean> => {
+  if (!req.session || !req.session.user) return false;
 
-//   return false;
-// };
+  if (req.session && req.session.user) {
+    if (Date.parse(`${req.session.cookie.expires}`) < Date.now()) return false;
+    req.session.touch();
+    // build token
+    let token = await Token.buildToken({ id: req.session.user.id as Schema.Types.ObjectId, role: req.session.user.role, userID: req.session.user.user });
+    buildCookies(req, res, token);
+    return true;
+  }
+
+  return false;
+};

@@ -10,7 +10,6 @@ export interface Keys {
   MONGODB_URI_WINTSON: string;
   ticketValidationInDays: number;
   timeBetweenPasswordResetsInHours: number;
-  maxLogins: number;
   banDurationInHours: number;
   maxTicketUsagePerHour: number;
   WS_PORT: number;
@@ -18,6 +17,7 @@ export interface Keys {
   temp_Token_Secret: string;
   temp_Token_Algorithm: Algorithm;
   cookie_maxAge_in_Min: number;
+  cookie_token_maxAge_in_Hours: number;
   cookie_temp_maxAge_in_Min: number;
   User_Email: string;
   User_Password: string;
@@ -25,4 +25,9 @@ export interface Keys {
   REFRESH_TOKEN: string;
   CLIENT_SECRET: string;
   CLIENT_ID: string;
+  Token_Algorithm: string;
+  maxLogins: number;
+  Token_Validation_Time: Algorithm;
+  PRIVATEKEY: any;
+  PUBLICKEY: any;
 }

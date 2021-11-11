@@ -1,38 +1,8 @@
 import mongoose from "mongoose";
 import { v5 } from 'uuid';
+import { UserAttrs, UserDoc, UserModel } from "../../interfaces/mongo/User";
 import { Password } from "../../services/hash-password/password";
-import { obfuscate } from "./getters/obfuscate";
-
-interface UserAttrs {
-  name: string;
-  email: string;
-  password: string;
-  country: string;
-}
-
-interface UserDoc extends mongoose.Document {
-  name: string;
-  email: string;
-  userID: string;
-  password: string;
-  score: number;
-  country: string;
-  isVerified: boolean;
-  role: string;
-  active: boolean;
-  otp: string;
-  otpRequestCounter: number;
-  otpNextResendAt: Date;
-  otpSubmitCounter: number; // number of submitted OTP in a short time
-  forgotPasswordResetCounter: number;
-  forgotPasswordNextResetAt: Date;
-  scoreUpdateAt: Date;
-  challengesHints: [string];
-};
-
-interface UserModel extends mongoose.Model<UserDoc> {
-  build(attrs: UserAttrs): UserDoc;
-}
+// import { obfuscate } from "./getters/obfuscate";
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -46,7 +16,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
-    get: obfuscate // when return email returned like (te***@test.com)
+    // get: obfuscate // when return email returned like (te***@test.com)
   },
   userID: {
     type: String,
@@ -91,6 +61,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  otpNextSubmitAt: {
+    type: Date,
+    default: Date.now
+  },
   forgotPasswordResetCounter: {
     type: Number,
     default: 0
@@ -121,29 +95,30 @@ const userSchema = new mongoose.Schema({
       delete ret.forgotPasswordNextResetAt;
       delete ret.scoreUpdateAt;
       delete ret.otpRequestCounter;
+      delete ret.otpNextSubmitAt;
       delete ret.otpSubmitCounter;
       delete ret.forgotPasswordResetCounter;
       delete ret.active;
     }
   },
-  // toObject: {
-  //   getters: true,
-  //   versionKey: false,
-  //   transform: (doc, ret) => {
-  //     ret.id = String(ret._id);
-  //     delete ret._id;
-  //     delete ret.role;
-  //     delete ret.password;
-  //     delete ret.otpNextResendAt;
-  //     delete ret.forgotPasswordNextResetAt;
-  //     delete ret.scoreUpdateAt;
-  //     delete ret.otpRequestCounter;
-  //     delete ret.otpSubmitCounter;
-  //     delete ret.forgotPasswordResetCounter;
-  //     delete ret.active;
-  //     return ret;
-  //   },
-  // },
+  toObject: {
+    // getters: true,
+    versionKey: false,
+    transform: (doc, ret) => {
+      ret.id = String(ret._id);
+      delete ret._id;
+      // delete ret.role;
+      // delete ret.password;
+      // delete ret.otpNextResendAt;
+      // delete ret.forgotPasswordNextResetAt;
+      // delete ret.scoreUpdateAt;
+      // delete ret.otpRequestCounter;
+      // delete ret.otpSubmitCounter;
+      // delete ret.forgotPasswordResetCounter;
+      // delete ret.active;
+      return ret;
+    },
+  },
 });
 
 /**
@@ -176,6 +151,61 @@ userSchema.query.byName = function (name: string) {
 
 userSchema.query.byEmail = function (email: string) {
   return this.where({ email });
+};
+
+userSchema.query.byUUID = function (userID: string) {
+  return this.where({ userID });
+};
+
+userSchema.methods.updateOtp = function () {
+  let blockTimeInMinutes = 1;
+  let nextResendTime = 0;
+
+  // block user for 1h if he made 5 requests
+  // otherwise block user for 1 minute
+  if (this.otpRequestCounter === 4) {
+    blockTimeInMinutes = 60;
+    this.otpRequestCounter = -1; // set otpRequestCounter to 0 after (1) hour of blocking
+  } else if (this.otpRequestCounter === 3) {
+    blockTimeInMinutes = 30;
+  } else if (this.otpRequestCounter === 2) {
+    blockTimeInMinutes = 15;
+  } else if (this.otpRequestCounter === 1) {
+    blockTimeInMinutes = 5;
+  }
+
+  nextResendTime = new Date().getTime() + blockTimeInMinutes * 60 * 1000;
+
+  // generate 6-digits OTP
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  // set the otp && otpNextResendAt && otpRequestCounter in user document
+  this.otp = otp;
+  this.otpNextResendAt = new Date(nextResendTime);
+  this.otpRequestCounter++;
+};
+
+
+userSchema.methods.updateSubmitOtp = function () {
+  let blockTimeInMinutes = 0;
+
+  // block user for 30 min if he made 5 requests
+  // otherwise block user for 1 minute
+  if (this.otpSubmitCounter === 5) {
+    this.otpSubmitCounter = -1;
+    blockTimeInMinutes = 30 * 60 * 1000; // 30 min
+  }
+
+  this.otpNextSubmitAt = new Date().getTime() + blockTimeInMinutes;
+  this.otpSubmitCounter++;
+};
+
+
+userSchema.methods.setUserVerify = function () {
+  this.isVerified = true;
+  this.active = true;
+  this.otpRequestCounter = 0;
+  this.otpSubmitCounter = 0;
 };
 
 

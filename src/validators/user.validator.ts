@@ -39,3 +39,16 @@ export const registerValidators = [
     .matches(/^[a-zA-Z ]+$/)
     .withMessage('Country is invalid')
 ];
+
+export const otpValidation = [
+  body('otp')
+    .not()
+    .isEmpty()
+    .withMessage('OTP is required')
+    .isString()
+    .trim()
+    .matches(/[0-9]{6}/)
+    .withMessage('OTP is invalid')
+    .isLength({ min: 6, max: 6})
+    .withMessage('OTP is invalid'),
+]

@@ -18,8 +18,6 @@ export const tempTokenDurationInHours = process.env.tempTokenDurationInHours;
 
 export const timeBetweenPasswordResetsInHours = process.env.timeBetweenPasswordResetsInHours;
 
-export const maxLogins = process.env.maxLogins;
-
 /**
  * ------------------ TEMP TOKRN  -------------------------
  */
@@ -28,12 +26,31 @@ export const temp_Token_Secret = process.env.temp_Token_Secret;
 export const temp_Token_Algorithm = process.env.temp_Token_Algorithm;
 // ===========================================================
 
+
+/**
+ * ------------------ TOKRN  -------------------------
+ */
+export const Token_Algorithm = process.env.Token_Algorithm;
+export const maxLogins = process.env.maxLogins;
+export const Token_Validation_Time = process.env.Token_Validation_Time;
+export const PRIVATEKEY = process.env.PRIVATEKEY;
+export const PUBLICKEY = process.env.PUBLICKEY;
+// ===========================================================
+
+
 export const maxTicketUsagePerHour = process.env.maxTicketUsagePerHour;
 
 export const WS_PORT = process.env.WS_PORT;
 
+/**
+ * ------------------ Cookies  -------------------------
+ */
+ export const cookie_token_maxAge_in_Hours = process.env.cookie_token_maxAge_in_Hours;
 export const cookie_maxAge_in_Min = process.env.cookie_maxAge_in_Min;
 export const cookie_temp_maxAge_in_Min = process.env.cookie_temp_maxAge_in_Min;
+// ===========================================================
+
+
 
 
 /**

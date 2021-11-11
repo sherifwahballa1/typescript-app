@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import keys from "../../config";
+
 import { User } from "../../models/Users/user";
 import { buildTempCookies } from "../../services/cookie";
 import { Token } from "../../services/jwt"
+import { setTempSession } from "../../services/session/set-temp-session";
 
 export const SignUp = async (
   req: Request,
@@ -26,19 +27,14 @@ export const SignUp = async (
       .status(200)
       .json({ valid: false, msg: "Email has already been taken.", taken: true })
 
-
   const user = User.build({ name, email, password, country });
   await user.save();
 
   // generate temp token valid for 1 hour.
-  let token = Token.generateTempJWT({ email: email, userID: user.userID });
+  let token = Token.generateTempToken({ email: email, userID: user.userID, role: user.role });
 
-  if (req.session) {
-    req.session.user = { user: user.userID, token };
-    req.session.cookie.maxAge = keys.cookie_temp_maxAge_in_Min * 60 * 1000; // 1 hour
-    req.session.save();
-  }
-
+  // build cookies & session
+  if (req.session) setTempSession({ req, info: { user: user.userID, token, role: user.role } })
   buildTempCookies(req, res, token);
 
   return res.status(200).send({ user, token });

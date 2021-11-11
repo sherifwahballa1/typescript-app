@@ -1,11 +1,17 @@
+import { Schema } from "mongoose";
+
 export interface IUser {
 	email: string;
 	userID: string;
+	role: string;
 	iat?: number;
 	exp?: number;
 }
 
 export interface IUserSession {
-	user: string;
 	token: string;
+	user: string;
+	role: string;
+	id?: Schema.Types.ObjectId
 }
+

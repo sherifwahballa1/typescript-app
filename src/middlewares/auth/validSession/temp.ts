@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { buildTempCookies } from '../../../services/cookie';
 import { Token } from '../../../services/jwt';
-import { buildTempSession } from '../../../services/session/build-temp-session';
+import { ResetTempSession } from '../../../services/session/reset-temp-session';
 
 export const validTempSession = (req: Request, res: Response): boolean => {
   if (req.session && req.session.user) {
@@ -11,9 +11,9 @@ export const validTempSession = (req: Request, res: Response): boolean => {
   }
 
   if (req.signedCookies && req.signedCookies.t_auth) {
-    let info = Token.verifyTempJWT(req.signedCookies.t_auth);
+    let info = Token.verifyTempToken(req.signedCookies.t_auth);
     if (info) {
-      buildTempSession(req, info)
+      ResetTempSession({ req, info })
       return true;
     }
   }

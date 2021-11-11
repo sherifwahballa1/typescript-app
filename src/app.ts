@@ -12,7 +12,7 @@ import mongoSanitize from 'express-mongo-sanitize' // for nosql injection
 import lusca from "lusca"; //Web application security middleware.
 
 import { userRoutes } from './routes/user/user.API';
-import morganMiddleware from './middlewares/morganMiddleware';
+import morganMiddleware from './middlewares/morgan/morganMiddleware';
 import { errorHandler } from './middlewares/handler/error-handler';
 import { NotFoundError } from './errors/not-found-error';
 
@@ -50,7 +50,7 @@ class App {
   };
 
   private sessionOptions: session.SessionOptions = {
-    name: 'user_sid', // session_name
+    name: 'user_session', // session_name
     secret: keys.SESSION_SECRET, // secret to sign data
     resave: false, // resave in DB when expired?
     saveUninitialized: false, // save token if not have data
@@ -65,7 +65,7 @@ class App {
       httpOnly: true, // when setting this to true, as compliant clients will not allow client-side JavaScript to see the cookie in document.cookie
       signed: true,
       sameSite: true,
-      maxAge: 1 * 1000,  // 1 * 24 * 60 * 60 * 1000, // Cookie expires after 1 day(about a semester)
+      maxAge: 1 * 24 * 60 * 60 * 1000,  // default 1 * 24 * 60 * 60 * 1000, // Cookie expires after 1 day(about a semester)
       secure: process.env.NODE_ENV === 'production', //If true, this cookie may only dilivered while https
     },
     rolling: true,

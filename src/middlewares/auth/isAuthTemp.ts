@@ -35,7 +35,7 @@ export const isAuthTemp = (
   }
 
   // TODO: 4- verify token and return data
-  let userInfo = Token.verifyTempJWT(req.session.user?.token);
+  let userInfo = Token.verifyTempToken(req.session.user?.token);
 
   if (!userInfo) throw new NotAuthorizedError();
   req.user = userInfo;
