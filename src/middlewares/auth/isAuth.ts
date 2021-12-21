@@ -3,7 +3,7 @@ import { NotAuthorizedError } from '../../errors/not-authorized-error';
 import { Token } from '../../services/jwt';
 import { validSession } from './validSession/token';
 
-export const isAuth = (allowedRoles: [string]) => (
+export const isAuth = (allowedRoles: [string]) => async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -14,20 +14,20 @@ export const isAuth = (allowedRoles: [string]) => (
    * 3- check & validate headers
    */
 
+  let isValid = await validSession(req, res);
   // TODO: 1- check & validate session
-  if (!validSession(req, res)) {
+  if (!isValid) {
     throw new NotAuthorizedError('Session expired signin again.');
   }
 
-  // TODO: 2- check & verify cookies (token)
-  let info = Token.verifyToken(req.signedCookies.auth_token);
+  // TODO: 2- check & verify session (token)
+  let info = await Token.verifyToken(req.session.user?.token as string);
 
   // TODO: 3- check user privileges
   if (info && !isRoleAllowed(allowedRoles, info.role)) {
       throw new NotAuthorizedError('Not Authorized User not allowed to access.');
   }
-
-  console.log(info, 'INFO');
+  
   next();
 };
 

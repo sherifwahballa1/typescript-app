@@ -1,12 +1,17 @@
 import { Document, Model } from "mongoose";
 
+export interface UserCredentials {
+  name?: string;
+  email: string;
+  password: string;
+};
+
 export interface UserAttrs {
   name: string;
   email: string;
   password: string;
   country: string;
 };
-
 
 export interface UserDoc extends Document {
   name: string;
@@ -27,12 +32,18 @@ export interface UserDoc extends Document {
   forgotPasswordNextResetAt: Date;
   scoreUpdateAt: Date;
   challengesHints: [string];
+
+  updateOtp(): void;
+  updateSubmitOtp(): void;
+  setUserVerify(): void;
 };
 
 
 export interface UserModel extends Model<UserDoc> {
   build(attrs: UserAttrs): UserDoc;
-  updateOtp(): void;
-  updateSubmitOtp(): void;
-  setUserVerify(): void;
+  findByCredentials(credentials: UserCredentials): Promise<UserDoc | null>;
+  byName(name: string): Promise<UserDoc | null>;
+  byEmail(email: string): Promise<UserDoc | null>;
+  byUUID(UUID: string): Promise<UserDoc | null>;
+  byUserID(id: string): Promise<UserDoc | null>;
 }

@@ -14,7 +14,7 @@ export const SendOtp = async (
   if (!uuid.validate(req.user?.userID as string))
     throw new BadRequestError('Invalid Credentials');
 
-  const user = await User.findOne().byUUID(req.user?.userID as string);
+  const user = await User.byUUID(req.user?.userID as string);
   if (!user) throw new NotAuthorizedError();
 
   let otpNextResendAtInMilliseconds = new Date(user.otpNextResendAt).getTime();
@@ -29,7 +29,7 @@ export const SendOtp = async (
   user.updateOtp();
   await user.save();
 
-  await new Email({ name: user.name, email: user.email, code: user.code }).sendWelcome();
+  await new Email({ name: user.name, email: user.email, code: user.otp }).sendWelcome();
 
   return res.status(200).send({ message: "Please Check your Email", email: user.email });
 };

@@ -1,5 +1,3 @@
-import { Schema } from "mongoose";
-
 export interface tempPayload {
   userID: string;
   email: string;
@@ -9,7 +7,7 @@ export interface tempPayload {
 
 export interface tokenPayload {
   userID: string;
-  id: Schema.Types.ObjectId;
+  id: string;
   role: string;
   iat?: number;
   exp?: number;

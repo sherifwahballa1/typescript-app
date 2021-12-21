@@ -1,10 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 import { v5 } from 'uuid';
-import { UserAttrs, UserDoc, UserModel } from "../../interfaces/mongo/User";
+import { NotAuthorizedError } from "../../errors/not-authorized-error";
+import { UserAttrs, UserCredentials, UserDoc, UserModel } from "../../interfaces/mongo/User";
 import { Password } from "../../services/hash-password/password";
 // import { obfuscate } from "./getters/obfuscate";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -78,6 +79,13 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   },
   challengesHints: [],
+  // Expires in a week
+  // createdAt: {
+  //   type: Date,
+  //   required: true,
+  //   expires: 60 * 60 * 24 * 7,
+  //   default: Date.now,
+  // },
 }, {
   // collection: "Users",
   // versionKey: false,
@@ -140,22 +148,34 @@ userSchema.statics.build = (attrs: UserAttrs) => {
 }
 
 // used with findOne ---- return object
-userSchema.query.userByName = function (name: string) {
-  return this.where({ name });
+userSchema.statics.userByName = function (this: Model<UserDoc>, name: string) {
+  return this.findOne({ name }).exec();
 };
 
-// used with find ---- return array
-userSchema.query.byName = function (name: string) {
-  return this.where({ name: { $regex: name, $options: 'i' } });
+userSchema.statics.byID = function (this: Model<UserDoc>, id: string) {
+  return this.findById({ id }).exec();
 };
 
-userSchema.query.byEmail = function (email: string) {
-  return this.where({ email });
+userSchema.statics.byEmail = function (this: Model<UserDoc>, email: string) {
+  return this.findOne({ email }).exec();
 };
 
-userSchema.query.byUUID = function (userID: string) {
-  return this.where({ userID });
+userSchema.statics.byUUID = function (this: Model<UserDoc>, userID: string) {
+  return this.findOne({ userID }).exec();
 };
+
+userSchema.statics.findByCredentials = async function (this: Model<UserDoc>, credentials: UserCredentials) {
+  const user: any = this.findOne({ email: credentials.email })
+
+  if (!user) throw new NotAuthorizedError('Invalid Credentials');
+
+  const isMatch = await Password.compare(user.password, credentials.password);
+
+  if (!isMatch)
+    throw new NotAuthorizedError('Invalid Credentials')
+
+  return user
+}
 
 userSchema.methods.updateOtp = function () {
   let blockTimeInMinutes = 1;
@@ -208,22 +228,6 @@ userSchema.methods.setUserVerify = function () {
   this.otpSubmitCounter = 0;
 };
 
-
-// userschema.statics.findByCredentials = async (email, password) => {
-//   const user:any = await User.findOne({ email })
-
-//   if (!user) {
-//       throw new Error('Unable to login')
-//   }
-
-//   const isMatch = await bcrypt.compare(password, user.password)
-
-//   if (!isMatch) {
-//       throw new Error('Unable to login')
-//   }
-
-//   return user
-// }
 
 const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
 

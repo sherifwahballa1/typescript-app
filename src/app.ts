@@ -74,8 +74,7 @@ class App {
       mongoUrl: keys.MONGODB_URI,
       ttl: 1 * 24 * 60 * 60, // time to live = 1 day
       collectionName: 'express_session',
-      autoRemove: 'interval', // remove expired sessions
-      autoRemoveInterval: 24 * 60,  // Interval (in minutes) used when autoRemove option is set to interval.
+      autoRemove: 'native', // remove expired sessions
       crypto: {
         secret: keys.SESSION_SECRET,
       },

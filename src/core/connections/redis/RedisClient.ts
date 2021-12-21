@@ -19,6 +19,7 @@ export default class RedisClient {
     host: (process.env.NODE_ENV == 'production') ? keys.REDIS_HOST : "127.0.0.1",
     port: +keys.REDIS_PORT! || 6379,
     retry_strategy: function (options) {
+      console.log('ECONNREFUSED', options.attempt ,'\n\n\n\n\n\n\n');
       if (options.error && options.error.code === "ECONNREFUSED") {
         // End reconnecting on a specific error and flush all commands with
         // a individual error
@@ -78,9 +79,9 @@ export default class RedisClient {
 
   public createRedisClient(): redis.RedisClient {
     this.client = redis.createClient(this.options);
-    this.client.on('error', (err: string) => {
-      Log.error(`RedisClient::connect() - ERROR  ${err}`);
-      Logger.error(`RedisClient::connect() - ERROR  ${err}`);
+    this.client.on('error', (err: any) => {
+      Log.error(`RedisClient::connect() - ERROR  ${err.message}`);
+      Logger.error(`RedisClient::connect() - ERROR  ${err.message}`);
     });
     this.client.on('ready', () => {
       Log.info('RedisClient::connect() - ready');
@@ -110,9 +111,9 @@ export default class RedisClient {
         this.client.on('end', () => {
           fulfill(true);
         });
-      } catch (err) {
-        Log.error(`RedisClient::disconnect() - ERROR  + ${err}`);
-        Logger.error(`RedisClient::disconnect() - ERROR  + ${err}`);
+      } catch (err: any) {
+        Log.error(`RedisClient::disconnect() - ERROR  + ${err.message}`);
+        Logger.error(`RedisClient::disconnect() - ERROR  + ${err.message}`);
         reject(err);
       }
     });

@@ -1,7 +1,7 @@
 import express from 'express';
-import { SignUp, SendOtp, VerifyOtp, Profile } from '../../controllers/user';
+import { SignUp, SendOtp, VerifyOtp, Login, Profile } from '../../controllers/user';
 import { validateRequest } from '../../middlewares/validator/validate-request';
-import { registerValidators, otpValidation } from '../../validators/user.validator';
+import { registerValidators, otpValidation, loginValidators } from '../../validators/user.validator';
 import { isAuthTemp } from '../../middlewares/auth/isAuthTemp';
 import { isAuth } from '../../middlewares/auth/isAuth';
 import tryCatchWrapper from '../../middlewares/tryCatch/tryCatchWrapper';
@@ -15,6 +15,8 @@ router.get("/verification-code.json", isAuthTemp, tryCatchWrapper(SendOtp));
 
 router.post("/verify.json", isAuthTemp, otpValidation, validateRequest, tryCatchWrapper(VerifyOtp));
 
-router.get('/profile', isAuth(['user']), Profile);
+router.post("/login.json", loginValidators, validateRequest, tryCatchWrapper(Login));
+
+router.get('/profile', isAuth(['user']), tryCatchWrapper(Profile));
 
 export { router as userRoutes };

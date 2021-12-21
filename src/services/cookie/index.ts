@@ -21,6 +21,8 @@ export const buildCookies = (
   res: Response,
   token: string
 ): void => {
+  res.clearCookie('auth_token');
+  
   res.cookie('auth_token', token, {
     httpOnly: true,
     maxAge: req.session.cookie.maxAge,
@@ -28,5 +30,14 @@ export const buildCookies = (
     secure: process.env.NODE_ENV === 'production',
     signed: true,
     sameSite: "none",
-  })
+  });
+
+  // res.cookie('isLogged', true, {
+  //   httpOnly: true,
+  //   maxAge: req.session.cookie.maxAge,
+  //   expires: req.session.cookie.expires,
+  //   secure: process.env.NODE_ENV === 'production',
+  //   signed: true,
+  //   sameSite: "lax",
+  // })
 };

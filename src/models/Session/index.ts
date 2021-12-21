@@ -45,7 +45,7 @@ function getRandom() {
 
 
 // create new random number for session
-sessionSchema.methods.newLogin = function (opts: LoginDetails): NewLogin {
+sessionSchema.methods.newLogin = function () {
   const ticket = {
     urn: getRandom()
   };

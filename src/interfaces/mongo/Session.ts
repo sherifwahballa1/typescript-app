@@ -1,4 +1,5 @@
 import { Document, Model } from "mongoose";
+import { NewLogin } from "../ISession";
 
 export interface UserAttrs {
   name: string;
@@ -31,6 +32,8 @@ export interface SessionDoc extends Document {
 
 export interface SessionModel extends Model<SessionDoc> {
   initSession(): void;
+  newLogin(): NewLogin;
+  // newLogin(): any;
   // build(attrs: UserAttrs): UserDoc;
   // updateSubmitOtp(): void;
   // setUserVerify(): void;

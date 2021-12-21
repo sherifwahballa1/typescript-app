@@ -1,4 +1,4 @@
-import { Model, Schema } from "mongoose";
+import { Model } from "mongoose";
 
 import { NewLogin } from "../../interfaces/ISession";
 import { SessionDoc } from "../../interfaces/mongo/Session";
@@ -11,9 +11,9 @@ export default class SessionManager {
     this.sessionModel = Session;
   }
 
-  async login(id: Schema.Types.ObjectId): Promise<NewLogin> {
+  async login(id: string): Promise<NewLogin> {
     // check if user session existing
-    let record = await this.sessionModel.findOne().byUserID(id);
+    let record = await this.sessionModel.findOne({ user: id })
 
     // create and init session if not exists
     if (!record) {

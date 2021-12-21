@@ -44,10 +44,12 @@ export const VerifyOtp = async (
   await user.save();
 
   // build token
-  let token = await Token.buildToken({ id: user.id as Schema.Types.ObjectId, role: user.role, userID: user.userID });
-  // build session & cookies
-  if (req.session) setTokenSession({ req, info: { user: user.userID, id: user.id as Schema.Types.ObjectId, role: user.role, token: crypto.randomBytes(16).toString('base64') } });
+  let token = await Token.buildToken({ id: user.id, role: user.role, userID: user.userID });
+  
+  // build session & cookies & remove tmep_token
+  if (req.session) setTokenSession({ req, info: { user: user.userID, id: user.indeterminate_check_box, role: user.role, token: crypto.randomBytes(16).toString('base64') } });
   buildCookies(req, res, token);
+  res.clearCookie("t_auth");
 
   return res.status(200).send({ user, token });
 };
